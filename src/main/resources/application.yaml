@@ -23,3 +23,9 @@ app:
     kafkaMessageUserRegisterTopic: "user-register"
     kafkaMessageNewBookingTopic: "new-booking"
     kafkaMessageGroupId: "kafka-message-group-id"
+  cache:
+    config:
+      hotels:
+        expiry: 10m
+      rooms:
+        expiry: 5m
