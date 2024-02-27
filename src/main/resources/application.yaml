@@ -1,16 +1,18 @@
 spring:
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: kafka:9092
   mvc:
     format:
       date-time: iso
   data:
+    redis:
+      host: redis
     mongodb:
-      uri: mongodb://root:root@localhost:27017/appdatabase?authSource=admin
+      uri: mongodb://root:root@mongo-db:27017/appdatabase?authSource=admin
   jpa:
     generate-ddl: true
   datasource:
-    url: jdbc:postgresql://localhost:5432/booking_db
+    url: jdbc:postgresql://postgres-db:5432/booking_db
     username: postgres
     password: postgres
     hikari:

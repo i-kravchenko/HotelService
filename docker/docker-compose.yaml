@@ -1,21 +1,28 @@
 version: '3'
 services:
-  postgres:
-    image: postgres:12.3
+  app:
+    image: 'hotel-service:latest'
     ports:
-      - "5432:5432"
+      - "8080:8080"
+    build:
+      context: ..
+    container_name: app
+    depends_on:
+      - postgres-db
+      - redis
+      - mongo-db
+      - zookeeper
+      - kafka
+  postgres-db:
+    image: postgres:12.3
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=booking_db
   redis:
     image: redis:7.0.12
-    ports:
-      - "6379:6379"
-  mongodb:
+  mongo-db:
     image: mongo:6.0.8
-    ports:
-      - "27017:27017"
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: root
@@ -24,14 +31,10 @@ services:
     image: confluentinc/cp-zookeeper:6.2.0
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
-    ports:
-      - "2181:2181"
   kafka:
     image: confluentinc/cp-kafka:6.2.0
     depends_on:
       - zookeeper
-    ports:
-      - "9092:9092"
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
