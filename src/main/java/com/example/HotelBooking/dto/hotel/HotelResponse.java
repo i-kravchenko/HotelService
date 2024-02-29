@@ -2,10 +2,12 @@ package com.example.HotelBooking.dto.hotel;
 
 import lombok.*;
 
+import java.io.Serializable;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class HotelResponse
+public class HotelResponse implements Serializable
 {
     private Long hotelId;
     private String name;

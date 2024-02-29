@@ -7,7 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -23,7 +22,7 @@ public class ExceptionHandlerController
 {
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<ErrorResponse> notFound(EntityNotFoundException e) {
-        log.error("Entity not found");
+        log.error("Entity not found", e);
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
                 .body(new ErrorResponse(e.getMessage()));
@@ -31,7 +30,7 @@ public class ExceptionHandlerController
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> notValid(MethodArgumentNotValidException e) {
-        log.error("Bad request");
+        log.error("Bad request", e);
         BindingResult bindingResult = e.getBindingResult();
         List<String> errorMessages = bindingResult.getAllErrors()
                 .stream()
@@ -44,21 +43,21 @@ public class ExceptionHandlerController
 
     @ExceptionHandler(EntityExistsException.class)
     public ResponseEntity<ErrorResponse> entityExist(EntityExistsException e) {
-        log.error("Entity already exist");
+        log.error("Entity already exist", e);
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
                 .body(new ErrorResponse(e.getMessage()));
     }
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ResponseEntity<ErrorResponse> notAllowed(HttpRequestMethodNotSupportedException e) {
-        log.error("Method Not Allowed");
+        log.error("Method Not Allowed", e);
         return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
                 .body(new ErrorResponse(e.getMessage()));
     }
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorResponse> accessDenied(AccessDeniedException e) {
-        log.error("Access Denied");
+        log.error("Access Denied", e);
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ErrorResponse(e.getMessage()));
     }
 

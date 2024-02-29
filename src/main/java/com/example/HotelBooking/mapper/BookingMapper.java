@@ -4,10 +4,13 @@ import com.example.HotelBooking.dto.booking.BookingResponse;
 import com.example.HotelBooking.dto.booking.UpsertBookingRequest;
 import com.example.HotelBooking.dto.event.NewBookingEvent;
 import com.example.HotelBooking.entity.Booking;
-import org.mapstruct.DecoratedWith;
+import com.example.HotelBooking.repository.RoomRepository;
+import com.example.HotelBooking.repository.UserRepository;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.Mappings;
 import org.mapstruct.ReportingPolicy;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Mapper(
         componentModel = "spring",
@@ -17,13 +20,24 @@ import org.mapstruct.ReportingPolicy;
                 UserMapper.class
         }
 )
-@DecoratedWith(BookingMapperDelegate.class)
-public interface BookingMapper
+public abstract class BookingMapper
 {
-    Booking requestToBooking(UpsertBookingRequest request);
+    @Autowired
+    protected UserRepository userRepository;
+    @Autowired
+    protected RoomRepository roomRepository;
+
+
+    @Mappings({
+            @Mapping(target = "user",
+                    expression = "java(userRepository.findById(request.getUserId()).get())"),
+            @Mapping(target = "room",
+                    expression = "java(roomRepository.findById(request.getRoomId()).get())"),
+    })
+    public abstract Booking requestToBooking(UpsertBookingRequest request);
     @Mapping(source = "id", target = "bookingId")
-    BookingResponse bookingToResponse(Booking booking);
+    public abstract BookingResponse bookingToResponse(Booking booking);
 
     @Mapping(source = "user.id", target = "userId")
-    NewBookingEvent bookingToEvent(Booking booking);
+    public abstract NewBookingEvent bookingToEvent(Booking booking);
 }

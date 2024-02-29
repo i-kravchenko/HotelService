@@ -1,6 +1,9 @@
 package com.example.HotelBooking.service;
 
 import com.example.HotelBooking.dto.Request;
+import com.example.HotelBooking.dto.ResponseList;
+import com.example.HotelBooking.dto.booking.BookingResponse;
+import com.example.HotelBooking.dto.booking.UpsertBookingRequest;
 import com.example.HotelBooking.dto.event.NewBookingEvent;
 import com.example.HotelBooking.dto.room.RoomRequest;
 import com.example.HotelBooking.entity.Booking;
@@ -27,24 +30,30 @@ public class BookingService
     private final BookingMapper mapper;
     private final KafkaTemplate<String, NewBookingEvent> kafkaTemplate;
 
-    public Page<Booking> findAll(Request request) {
-        return repository.findAll(
+    public ResponseList<BookingResponse> findAll(Request request) {
+        Page<Booking> page = repository.findAll(
                 PageRequest.of(request.getPageNumber(), request.getPageSize())
         );
+        ResponseList<BookingResponse> response = new ResponseList<>();
+        response.setItems(page.getContent().stream().map(mapper::bookingToResponse).toList());
+        response.setTotalCount(page.getTotalElements());
+        return response;
     }
 
-    public Booking bookRoom(Booking booking) {
-        RoomRequest request = RoomRequest.builder()
+    public BookingResponse bookRoom(UpsertBookingRequest request) {
+        Booking booking = mapper.requestToBooking(request);
+        RoomRequest roomRequest = RoomRequest.builder()
                 .roomId(booking.getRoom().getId())
                 .arrivalDate(booking.getArrivalDate())
                 .departureDate(booking.getDepartureDate())
                 .build();
-        request.setPageNumber(0);
-        request.setPageSize(1);
-        if(roomService.findAll(request).getContent().isEmpty()) {
+        roomRequest.setPageNumber(0);
+        roomRequest.setPageSize(1);
+        if(roomService.findAll(roomRequest).getItems().isEmpty()) {
             throw new EntityExistsException("The room is occupied. Choose other dates or room!");
         }
+        booking = repository.save(booking);
         kafkaTemplate.send(topic, UUID.randomUUID().toString(), mapper.bookingToEvent(booking));
-        return repository.save(booking);
+        return mapper.bookingToResponse(booking);
     }
 }

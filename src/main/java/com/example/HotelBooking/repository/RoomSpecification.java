@@ -3,11 +3,11 @@ package com.example.HotelBooking.repository;
 import com.example.HotelBooking.dto.room.RoomRequest;
 import com.example.HotelBooking.entity.Booking;
 import com.example.HotelBooking.entity.Room;
-import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalDate;
-import java.util.List;
 
 public interface RoomSpecification
 {
@@ -68,9 +68,13 @@ public interface RoomSpecification
             if (arrivalDate == null || departureDate == null) {
                 return null;
             }
-            return criteriaBuilder.and(
-                    criteriaBuilder.between(root.get("bookings").get("arrivalDate"), arrivalDate, departureDate).not(),
-                    criteriaBuilder.between(root.get("bookings").get("departureDate"), arrivalDate, departureDate).not()
+            Join<Room, Booking> bookings = root.join("bookings", JoinType.LEFT);
+            return criteriaBuilder.or(
+                    criteriaBuilder.isNull(bookings),
+                    criteriaBuilder.and(
+                            criteriaBuilder.between(bookings.get("arrivalDate"), arrivalDate, departureDate).not(),
+                            criteriaBuilder.between(bookings.get("departureDate"), arrivalDate, departureDate).not()
+                    )
             );
         });
     }

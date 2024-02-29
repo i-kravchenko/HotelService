@@ -6,14 +6,13 @@ import lombok.Setter;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.List;
 
 @Entity
 @Getter
 @Setter
-public class Room implements Serializable
+public class Room
 {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
